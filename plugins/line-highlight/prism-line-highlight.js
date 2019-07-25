@@ -62,10 +62,13 @@
 		var parentElement = hasLineNumbers ? pre : pre.querySelector('code') || pre;
 		var mutateActions = /** @type {(() => void)[]} */ ([]);
 
+		// we changed the range syntax to include a letter before the
+		// range itself: w, r or g for white, red or green
 		ranges.forEach(function (currentRange) {
 			var range = currentRange.split('-');
+			var type = range[0][0];
 
-			var start = +range[0];
+			var start = +range[0].substring(1);
 			var end = +range[1] || start;
 
 			var line = pre.querySelector('.line-highlight[data-range="' + currentRange + '"]') || document.createElement('div');
@@ -73,7 +76,7 @@
 			mutateActions.push(function () {
 				line.setAttribute('aria-hidden', 'true');
 				line.setAttribute('data-range', currentRange);
-				line.className = (classes || '') + ' line-highlight';
+				line.className = (classes || '') + ' line-highlight line-highlight-' + type;
 			});
 
 			// if the line-numbers plugin is enabled, then there is no reason for this plugin to display the line numbers
