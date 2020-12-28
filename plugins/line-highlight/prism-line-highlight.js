@@ -90,51 +90,47 @@
 			var end = +range[1] || start;
 
 			/** @type {HTMLElement} */
-			var line = pre.querySelector('.line-highlight[data-range="' + currentRange + '"]') || document.createElement('div');
+			for (let i = start; i <= end; i++) {
+				const line = pre.querySelector('.line-highlight[data-line="' + i + '"]') || document.createElement('div');
 
-			mutateActions.push(function () {
-				line.setAttribute('aria-hidden', 'true');
-				line.setAttribute('data-range', currentRange);
-				line.className = (classes || '') + ' line-highlight line-highlight-' + type;
-			});
-
-			// if the line-numbers plugin is enabled, then there is no reason for this plugin to display the line numbers
-			if (hasLineNumbers && Prism.plugins.lineNumbers) {
-				var startNode = Prism.plugins.lineNumbers.getLine(pre, start);
-				var endNode = Prism.plugins.lineNumbers.getLine(pre, end);
-
-				if (startNode) {
-					var top = startNode.offsetTop + 'px';
-					mutateActions.push(function () {
-						line.style.top = top;
-					});
-				}
-
-				if (endNode) {
-					var height = (endNode.offsetTop - startNode.offsetTop) + endNode.offsetHeight + 'px';
-					mutateActions.push(function () {
-						line.style.height = height;
-					});
-				}
-			} else {
 				mutateActions.push(function () {
-					line.setAttribute('data-start', start);
+					line.setAttribute('aria-hidden', 'true');
+					line.setAttribute('data-line', i);
+					line.className = (classes || '') + ' line-highlight line-highlight-' + type;
+				});
 
-					if (end > start) {
-						line.setAttribute('data-end', end);
+				// if the line-numbers plugin is enabled, then there is no reason for this plugin to display the line numbers
+				if (hasLineNumbers && Prism.plugins.lineNumbers) {
+					var startNode = Prism.plugins.lineNumbers.getLine(pre, start);
+					var endNode = Prism.plugins.lineNumbers.getLine(pre, end);
+
+					if (startNode) {
+						var top = startNode.offsetTop + 'px';
+						mutateActions.push(function () {
+							line.style.top = top;
+						});
 					}
 
-					line.style.top = (start - offset - 1) * lineHeight + 'px';
+					if (endNode) {
+						var height = (endNode.offsetTop - startNode.offsetTop) + endNode.offsetHeight + 'px';
+						mutateActions.push(function () {
+							line.style.height = height;
+						});
+					}
+				} else {
+					mutateActions.push(function () {
+						line.setAttribute('data-start', i);
+						line.style.top = (i - offset - 1) * lineHeight + 'px';
+						line.textContent = ' \n';
+					});
+				}
 
-					line.textContent = new Array(end - start + 2).join(' \n');
+				mutateActions.push(function () {
+					// allow this to play nicely with the line-numbers plugin
+					// need to attack to pre as when line-numbers is enabled, the code tag is relatively which screws up the positioning
+					parentElement.appendChild(line);
 				});
 			}
-
-			mutateActions.push(function () {
-				// allow this to play nicely with the line-numbers plugin
-				// need to attack to pre as when line-numbers is enabled, the code tag is relatively which screws up the positioning
-				parentElement.appendChild(line);
-			});
 		});
 
 		var id = pre.id;
